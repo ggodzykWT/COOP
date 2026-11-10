@@ -160,7 +160,8 @@ try{
     layer.addLayer(m);
     markerByAddress.set(r.address,m);
   });
-  if(markerByAddress.size){map.fitBounds(L.featureGroup([...markerByAddress.values()]).getBounds().pad(.12),{maxZoom:11});}
+  map.invalidateSize();
+  map.setView([42.759,-71.031],12);
 
   tour=[...records].filter(r=>markerByAddress.has(r.address)).sort((a,b)=>b.students-a.students).slice(0,10);
   let tourTimer=null,tourIdx=0,activeMarker=null;
