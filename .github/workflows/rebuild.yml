@@ -1,0 +1,48 @@
+name: Rebuild signage from Google Sheet
+
+on:
+  schedule:
+    # Every 2 hours. GitHub Pages republishes automatically within a
+    # couple minutes of any push this workflow makes to main.
+    - cron: "0 */2 * * *"
+  workflow_dispatch: {}   # lets you trigger a rebuild manually from the Actions tab
+
+permissions:
+  contents: write   # needed so the workflow can commit/push its own changes
+
+concurrency:
+  group: rebuild-signage
+  cancel-in-progress: false
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Run build script
+        run: python3 scripts/build.py
+
+      - name: Commit and push if anything changed
+        run: |
+          git config user.name "coop-data-bot"
+          git config user.email "actions@github.com"
+          git add data/ \
+            whittier_tech_coop_impact_dashboard_signage.html \
+            whittier_tech_coop_signage_1_overview.html \
+            whittier_tech_coop_signage_2_map.html \
+            whittier_tech_coop_signage_3_district.html \
+            whittier_tech_coop_signage_4_industries.html \
+            whittier_tech_coop_signage_5_communities.html
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "Auto-rebuild signage from Google Sheet [skip ci]"
+            git push
+          fi
