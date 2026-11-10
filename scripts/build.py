@@ -5,7 +5,7 @@ Google Sheet CSV.
 
 What it does, in order:
   1. Fetch the published CSV (Partner(s), Street, City, State, ZIP,
-     List entries, category).
+     Student Count, category).
   2. Geocode any address not already in data/coords_cache.json —
      primary: US Census Bureau geocoder (free, no key, built for
      exactly this kind of batch/automated US-address use).
@@ -76,7 +76,7 @@ def parse_records(csv_text):
         city = (row.get("City") or "").strip()
         state = (row.get("State") or "").strip()
         zip_ = (row.get("ZIP") or "").strip()
-        entries_raw = (row.get("List entries") or "").strip()
+        entries_raw = (row.get("Student Count") or "").strip()
         category = (row.get("category") or "").strip()
 
         if not category:
@@ -97,7 +97,7 @@ def parse_records(csv_text):
                 "City": city,
                 "State": state,
                 "ZIP": zip_,
-                "List entries": entries_raw or "0",
+                "Student Count": entries_raw or "0",
                 "category": category,
                 "address": address,
             }
