@@ -94,30 +94,14 @@ try{
   const map=L.map('map',{zoomControl:false,attributionControl:false,dragging:false,scrollWheelZoom:false,doubleClickZoom:false,boxZoom:false,keyboard:false,touchZoom:false}).setView([42.76,-71.02],9);
   L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19}).addTo(map);
   const layer=L.layerGroup().addTo(map);
-  const markerByAddress=new Map();
   records.forEach(r=>{
     const c=COORDS[r.address];
     if(!c)return;
-    const m=L.marker(c,{icon:L.divIcon({className:'',html:'<div class="dot"></div>',iconSize:[15,15],iconAnchor:[7,7]})})
-      .bindPopup(`<b>${escapeHTML(r['Partner(s)'])}</b>${r.isDistrict?' <span class="badge-district">DISTRICT</span>':''}<br>${escapeHTML(r.address)}<br><small>${escapeHTML(r.category)} \u00b7 ${r.students} student${r.students===1?'':'s'} on co-op here</small>`);
+    const m=L.marker(c,{icon:L.divIcon({className:'',html:'<div class="dot"></div>',iconSize:[15,15],iconAnchor:[7,7]})});
     layer.addLayer(m);
-    markerByAddress.set(r.address,m);
   });
-  if(markerByAddress.size){map.fitBounds(L.featureGroup([...markerByAddress.values()]).getBounds().pad(.12),{maxZoom:11});}
-
-  const tour=[...records].filter(r=>markerByAddress.has(r.address)).sort((a,b)=>b.students-a.students).slice(0,10);
-  let tourIdx=0,activeMarker=null;
-  function tourStep(){
-    try{
-      if(activeMarker)activeMarker.closePopup();
-      if(!tour.length)return;
-      const r=tour[tourIdx%tour.length];tourIdx++;
-      activeMarker=markerByAddress.get(r.address);
-      if(activeMarker)activeMarker.openPopup();
-    }catch(e){console.error('tour step failed',e);}
-  }
-  tourStep();
-  setInterval(tourStep,2600);
+  map.invalidateSize();
+  map.setView([42.759,-71.031],12);
 }catch(e){
   console.error('Map setup failed.',e);
   const mapEl=document.getElementById('map');
